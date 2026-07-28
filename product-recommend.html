@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-    <title>사진 보고 뭐 살지 추천</title>
+    <title>굿즈 랜덤박스</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dongle&display=swap');
 
@@ -123,22 +123,25 @@
 
         .loading {
             text-align: center;
-            padding: 30px 0;
+            padding: 24px 0;
         }
 
-        .spinner {
-            width: 46px;
-            height: 46px;
-            margin: 0 auto 14px;
-            border: 6px solid #ffd6dd;
-            border-top-color: #ff6a88;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .box-shake {
+            font-size: 60px;
+            display: inline-block;
+            margin-bottom: 10px;
+            animation: shake 0.45s infinite;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: rotate(-10deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(10deg) scale(1.05);
             }
         }
 
@@ -148,14 +151,62 @@
             margin: 0;
         }
 
-        .mood-tag {
+        #resultCard {
+            animation: popIn 0.35s ease;
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .rarity-badge {
             display: inline-block;
-            background: #fff0f2;
-            color: #ff6a88;
-            font-size: 22px;
-            padding: 4px 14px;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 5px 18px;
             border-radius: 999px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .rarity-common {
+            background: #f0f0f0;
+            color: #888;
+        }
+
+        .rarity-rare {
+            background: #e7f1fd;
+            color: #3b82c4;
+        }
+
+        .rarity-epic {
+            background: #f3e8fb;
+            color: #9b59b6;
+        }
+
+        .rarity-legendary {
+            background: linear-gradient(90deg, #ffe9a8, #ffd166);
+            color: #a5680a;
+            box-shadow: 0 0 12px rgba(255, 209, 102, 0.7);
+            animation: glow 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 6px rgba(255, 209, 102, 0.5);
+            }
+
+            to {
+                box-shadow: 0 0 16px rgba(255, 209, 102, 0.9);
+            }
         }
 
         .result-emoji {
@@ -172,7 +223,7 @@
             margin: 0 0 4px;
         }
 
-        .result-category {
+        .result-mood {
             text-align: center;
             font-size: 22px;
             color: #999;
@@ -229,33 +280,33 @@
 
 <body>
     <div class="app">
-        <h1>오늘 뭐 살까?</h1>
-        <p class="subtitle">사진 한 장이면 충분해요</p>
+        <h1>굿즈 랜덤박스 🎁</h1>
+        <p class="subtitle">사진 한 장으로 오늘의 굿즈를 뽑아보세요</p>
 
         <div class="card">
             <label class="upload-box" id="uploadBox">
                 <span class="icon">📷</span>
-                <p id="uploadText">사진 올리기 / 촬영하기</p>
+                <p id="uploadText">사진 올리기 / 사진첩에서 선택</p>
                 <input type="file" id="fileInput" accept="image/*">
             </label>
             <img id="preview" alt="업로드한 사진 미리보기">
-            <button class="primary" id="recommendBtn" disabled>이 사진으로 추천받기</button>
+            <button class="primary" id="recommendBtn" disabled>랜덤박스 뽑기 🎲</button>
         </div>
 
         <div class="card hidden" id="loadingCard">
             <div class="loading">
-                <div class="spinner"></div>
-                <p>사진 분위기 분석 중...</p>
+                <div class="box-shake">🎁</div>
+                <p>박스를 흔드는 중...</p>
             </div>
         </div>
 
         <div class="card hidden" id="resultCard">
             <div style="text-align:center;">
-                <span class="mood-tag" id="moodTag"></span>
+                <span class="rarity-badge" id="rarityBadge"></span>
             </div>
             <div class="result-emoji" id="resultEmoji"></div>
             <p class="result-name" id="resultName"></p>
-            <p class="result-category" id="resultCategory"></p>
+            <p class="result-mood" id="resultMood"></p>
             <div class="result-reason" id="resultReason"></div>
             <div class="btn-row">
                 <button class="btn-retry" id="retryBtn">다시 뽑기 🔀</button>
@@ -263,7 +314,7 @@
             </div>
         </div>
 
-        <p class="footer-note">* 사진의 전체 색감을 분석해 어울리는 아이템을 랜덤으로 골라드려요</p>
+        <p class="footer-note">* 사진의 색감을 분석해서, 그 무드에 어울리는 굿즈를 랜덤박스처럼 뽑아드려요. 등급은 완전 랜덤!</p>
     </div>
 
     <script>
@@ -274,58 +325,59 @@
         const recommendBtn = document.getElementById('recommendBtn');
         const loadingCard = document.getElementById('loadingCard');
         const resultCard = document.getElementById('resultCard');
-        const moodTag = document.getElementById('moodTag');
+        const rarityBadge = document.getElementById('rarityBadge');
         const resultEmoji = document.getElementById('resultEmoji');
         const resultName = document.getElementById('resultName');
-        const resultCategory = document.getElementById('resultCategory');
+        const resultMood = document.getElementById('resultMood');
         const resultReason = document.getElementById('resultReason');
         const searchLink = document.getElementById('searchLink');
         const retryBtn = document.getElementById('retryBtn');
 
         let currentMood = null;
 
-        // 사진 분위기(밝기/색감 톤)별 추천 아이템 목록
+        // 사진 분위기(밝기/색감 톤)별 굿즈 랜덤박스 아이템 (rarity: common/rare/epic/legendary)
         const PRODUCTS = {
             warm: [
-                { emoji: '🧣', name: '니트 머플러', category: '패션', reason: '사진에서 따뜻한 색감이 느껴져요. 포근한 니트 아이템으로 그 느낌을 이어가 보세요.' },
-                { emoji: '🕯️', name: '우드 향초', category: '홈/리빙', reason: '따뜻한 톤의 사진과 잘 어울리는 은은한 향초 하나, 방 분위기를 채워줄 거예요.' },
-                { emoji: '☕', name: '드립 커피 세트', category: '푸드', reason: '아늑한 색감의 사진이네요. 향긋한 커피 한 잔의 여유를 더해보세요.' },
-                { emoji: '🧦', name: '수면양말', category: '패션', reason: '따뜻함이 느껴지는 사진, 발끝까지 포근하게 챙겨보는 건 어때요?' },
-                { emoji: '🍯', name: '수제 꿀차 세트', category: '푸드', reason: '달콤하고 따뜻한 무드! 몸도 마음도 데워줄 아이템이에요.' }
+                { emoji: '🧸', name: '플러시 마스코트 키링', rarity: 'common', reason: '따뜻한 색감의 사진이에요. 폭신폭신한 마스코트 키링이 나왔어요.' },
+                { emoji: '🔑', name: '우드톤 아크릴 키링', rarity: 'common', reason: '은은한 우드톤 아크릴 키링, 데일리로 달고 다니기 좋아요.' },
+                { emoji: '🎗️', name: '자수 뱃지 세트', rarity: 'rare', reason: '포근한 무드에 어울리는 자수 뱃지 세트를 뽑았어요.' },
+                { emoji: '🧣', name: '캐릭터 니트 파우치', rarity: 'epic', reason: '따뜻한 톤 사진에서만 나오는 니트 파우치, 에픽 등급이에요!' },
+                { emoji: '🕯️', name: '한정판 미니 무드등', rarity: 'legendary', reason: '와, 레전더리! 따뜻한 사진에서만 뜨는 한정판 무드등이 나왔어요.' }
             ],
             cool: [
-                { emoji: '🧴', name: '수분 진정 토너', category: '뷰티', reason: '시원한 톤의 사진이에요. 피부에도 청량한 진정 케어를 선물해보세요.' },
-                { emoji: '💧', name: '텀블러', category: '리빙', reason: '차분하고 쿨한 색감! 매일 들고 다닐 예쁜 텀블러 어때요.' },
-                { emoji: '🕶️', name: '선글라스', category: '패션', reason: '시크한 분위기의 사진이네요. 포인트가 될 선글라스를 추천해요.' },
-                { emoji: '🧊', name: '미니 선풍기', category: '전자기기', reason: '쿨한 무드가 느껴져요. 어디서든 시원하게 다닐 수 있는 아이템이에요.' },
-                { emoji: '🩵', name: '블루라이트 차단 안경', category: '전자기기', reason: '차분한 색감의 사진, 눈 건강도 함께 챙겨보세요.' }
+                { emoji: '💠', name: '클리어 포토카드 홀더', rarity: 'common', reason: '시원한 톤의 사진이에요. 투명한 포토카드 홀더가 나왔어요.' },
+                { emoji: '💧', name: '미니 물방울 마그넷', rarity: 'common', reason: '쿨한 색감과 잘 어울리는 물방울 마그넷이에요.' },
+                { emoji: '🕶️', name: '캐릭터 선글라스 스트랩', rarity: 'rare', reason: '시크한 분위기의 사진, 선글라스 스트랩을 뽑았어요.' },
+                { emoji: '🩵', name: '홀로그램 아크릴 스탠드', rarity: 'epic', reason: '반짝이는 홀로그램 아크릴 스탠드, 쿨톤 전용 에픽템이에요!' },
+                { emoji: '🧿', name: '시크릿 나이트 피규어', rarity: 'legendary', reason: '레전더리 등급! 시원한 톤에서만 나오는 시크릿 피규어예요.' }
             ],
             bright: [
-                { emoji: '💄', name: '틴트 립밤', category: '뷰티', reason: '화사한 사진이에요! 화사함을 더해줄 컬러 아이템 어때요.' },
-                { emoji: '🎧', name: '무선 이어폰', category: '전자기기', reason: '밝고 경쾌한 분위기, 신나는 플레이리스트와 함께해보세요.' },
-                { emoji: '👟', name: '캔버스 스니커즈', category: '패션', reason: '사진 톤이 밝고 산뜻해요. 가벼운 발걸음을 만들어줄 신발 하나 어때요.' },
-                { emoji: '🌻', name: '미니 화분', category: '홈/리빙', reason: '생기 넘치는 사진이네요! 책상 위에 작은 생기를 더해보세요.' },
-                { emoji: '📸', name: '즉석카메라 필름', category: '취미', reason: '이 밝은 순간, 사진으로 한 번 더 남겨보는 건 어때요?' }
+                { emoji: '🌈', name: '무지개 스티커팩', rarity: 'common', reason: '화사한 사진이에요! 알록달록 스티커팩이 나왔어요.' },
+                { emoji: '💛', name: '컬러풀 뱃지 세트', rarity: 'common', reason: '밝고 경쾌한 분위기에 어울리는 뱃지 세트예요.' },
+                { emoji: '🎀', name: '리본 헤어핀', rarity: 'rare', reason: '산뜻한 사진 톤에서 리본 헤어핀을 뽑았어요.' },
+                { emoji: '👟', name: '미니 스니커즈 키링', rarity: 'epic', reason: '화사한 톤 전용 에픽템, 미니 스니커즈 키링이에요!' },
+                { emoji: '🌟', name: '반짝이 시크릿 피규어', rarity: 'legendary', reason: '대박! 화사한 사진에서만 뜨는 레전더리 시크릿 피규어예요.' }
             ],
             dark: [
-                { emoji: '🕯️', name: '무드등', category: '홈/리빙', reason: '차분하고 어두운 톤이에요. 은은한 무드등으로 분위기를 더해보세요.' },
-                { emoji: '📖', name: '베스트셀러 소설', category: '취미', reason: '조용한 분위기의 사진, 책 한 권과 함께하는 시간은 어떨까요.' },
-                { emoji: '🛌', name: '극세사 담요', category: '홈/리빙', reason: '깊고 차분한 색감이네요. 포근한 담요로 편안함을 더해보세요.' },
-                { emoji: '🎵', name: '헤드폰', category: '전자기기', reason: '몰입감 있는 분위기예요. 좋은 사운드로 여운을 즐겨보세요.' },
-                { emoji: '🍫', name: '다크초콜릿', category: '푸드', reason: '깊은 톤의 사진과 잘 어울리는 진한 다크초콜릿 어때요.' }
+                { emoji: '🖤', name: '블랙 라인 스티커', rarity: 'common', reason: '차분한 톤의 사진이에요. 심플한 블랙 라인 스티커가 나왔어요.' },
+                { emoji: '🌙', name: '미니 문 마그넷', rarity: 'common', reason: '조용한 분위기와 잘 어울리는 초승달 마그넷이에요.' },
+                { emoji: '🦇', name: '캐릭터 실루엣 뱃지', rarity: 'rare', reason: '깊은 톤의 사진에서 실루엣 뱃지를 뽑았어요.' },
+                { emoji: '🎩', name: '시크 아크릴 스탠드', rarity: 'epic', reason: '다크 톤 전용 에픽템, 시크한 아크릴 스탠드예요!' },
+                { emoji: '🕶️', name: '한정판 블랙에디션 피규어', rarity: 'legendary', reason: '레전더리! 어두운 톤에서만 나오는 블랙에디션 피규어예요.' }
             ],
             green: [
-                { emoji: '🪴', name: '수경식물', category: '홈/리빙', reason: '싱그러운 초록빛이 느껴져요. 작은 식물로 공간에 생기를 더해보세요.' },
-                { emoji: '🥗', name: '샐러드 밀키트', category: '푸드', reason: '자연스러운 색감이네요. 오늘은 건강한 한 끼 어때요.' },
-                { emoji: '🎒', name: '캠핑용 백팩', category: '취미', reason: '초록빛 사진을 보니 야외 활동이 생각나요. 가벼운 아웃도어템 추천해요.' },
-                { emoji: '🧘', name: '요가 매트', category: '헬스', reason: '편안한 자연 톤이에요. 몸과 마음을 이완시켜줄 요가 타임 어때요.' }
+                { emoji: '🍀', name: '클로버 키링', rarity: 'common', reason: '싱그러운 초록빛 사진이에요. 행운의 클로버 키링이 나왔어요.' },
+                { emoji: '🌵', name: '미니 화분 마그넷', rarity: 'common', reason: '자연스러운 색감과 잘 어울리는 화분 마그넷이에요.' },
+                { emoji: '🐢', name: '캐릭터 미니 인형', rarity: 'rare', reason: '초록빛 사진에서 귀여운 미니 인형을 뽑았어요.' },
+                { emoji: '🦋', name: '나비 아크릴 스탠드', rarity: 'epic', reason: '그린 톤 전용 에픽템, 나비 아크릴 스탠드예요!' },
+                { emoji: '🌳', name: '시크릿 자연 테마 피규어', rarity: 'legendary', reason: '레전더리 등극! 초록빛 사진에서만 나오는 시크릿 피규어예요.' }
             ],
             neutral: [
-                { emoji: '🎲', name: '오늘의 랜덤 아이템', category: '깜짝 추천', reason: '사진 색감이 다채로워서 딱 하나로 정하기 어려워요. 그래서 완전 랜덤으로 골라봤어요!' },
-                { emoji: '🧴', name: '핸드크림', category: '뷰티', reason: '언제나 무난하게 좋은 선택! 오늘은 나를 위한 작은 선물 어때요.' },
-                { emoji: '🔌', name: '보조배터리', category: '전자기기', reason: '실용템 하나 챙겨볼까요? 언제나 든든한 필수템이에요.' },
-                { emoji: '🐾', name: '반려동물 간식', category: '반려동물', reason: '오늘따라 왠지 함께하는 존재가 떠오르네요. 작은 간식 하나 어때요.' },
-                { emoji: '📔', name: '다이어리', category: '취미', reason: '오늘의 이 순간, 기록으로 남겨보는 것도 좋겠어요.' }
+                { emoji: '📎', name: '캐릭터 클립 세트', rarity: 'common', reason: '색감이 다채로운 사진이라 무난하게 잘 어울리는 클립 세트가 나왔어요.' },
+                { emoji: '🎲', name: '오늘의 미스터리 굿즈', rarity: 'common', reason: '딱 하나로 정하기 어려운 사진! 완전 랜덤 미스터리 굿즈예요.' },
+                { emoji: '🧷', name: '뱃지 3종 세트', rarity: 'rare', reason: '다채로운 톤에 어울리는 뱃지 3종 세트를 뽑았어요.' },
+                { emoji: '🎁', name: '서프라이즈 굿즈 세트', rarity: 'epic', reason: '에픽 등급! 알록달록 서프라이즈 굿즈 세트가 나왔어요.' },
+                { emoji: '👑', name: '히든 레전더리 굿즈', rarity: 'legendary', reason: '축하해요! 이번 뽑기에서 히든 레전더리 굿즈가 나왔어요.' }
             ]
         };
 
@@ -338,7 +390,19 @@
             neutral: '🎨 다채로운 톤'
         };
 
-        uploadBox.addEventListener('click', () => fileInput.click());
+        const RARITY_LABEL = {
+            common: '일반',
+            rare: '레어',
+            epic: '에픽',
+            legendary: '레전더리'
+        };
+
+        const RARITY_WEIGHT = {
+            common: 50,
+            rare: 30,
+            epic: 15,
+            legendary: 5
+        };
 
         fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
@@ -384,15 +448,26 @@
             return 'neutral';
         }
 
+        function pickItem(mood) {
+            const pool = PRODUCTS[mood];
+            const total = pool.reduce((sum, item) => sum + RARITY_WEIGHT[item.rarity], 0);
+            let roll = Math.random() * total;
+            for (const item of pool) {
+                roll -= RARITY_WEIGHT[item.rarity];
+                if (roll < 0) return item;
+            }
+            return pool[pool.length - 1];
+        }
+
         function showResult(mood) {
             currentMood = mood;
-            const list = PRODUCTS[mood];
-            const item = list[Math.floor(Math.random() * list.length)];
+            const item = pickItem(mood);
 
-            moodTag.textContent = MOOD_LABEL[mood];
+            rarityBadge.textContent = RARITY_LABEL[item.rarity];
+            rarityBadge.className = 'rarity-badge rarity-' + item.rarity;
             resultEmoji.textContent = item.emoji;
             resultName.textContent = item.name;
-            resultCategory.textContent = item.category;
+            resultMood.textContent = MOOD_LABEL[mood] + ' 사진에서 뽑음';
             resultReason.textContent = item.reason;
             searchLink.href = 'https://www.coupang.com/np/search?q=' + encodeURIComponent(item.name);
 
