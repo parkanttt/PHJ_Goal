@@ -17,7 +17,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: linear-gradient(160deg, #ff9a8b, #ff6a88, #ff99ac);
+            background: linear-gradient(160deg, #ffe066, #ffc700, #ffb300);
             display: flex;
             justify-content: center;
             padding: calc(24px + env(safe-area-inset-top)) 0 60px;
@@ -81,19 +81,19 @@
             font-family: 'Dongle', sans-serif;
             font-size: 26px;
             padding: 10px 14px;
-            border: 2px solid #ffd6dd;
+            border: 2px solid #ffe9a8;
             border-radius: 12px;
             outline: none;
             transition: border-color 0.15s, background 0.15s;
         }
 
         .entry-input:focus {
-            border-color: #ff6a88;
+            border-color: #ffb300;
         }
 
         .entry-row.winner .entry-input {
-            border-color: #a5680a;
-            background: #fff3d0;
+            border-color: #8a3d00;
+            background: #ffe1b3;
         }
 
         .remove-btn {
@@ -127,8 +127,8 @@
         button.primary {
             width: 100%;
             border: none;
-            background: #ff6a88;
-            color: #fff;
+            background: #ffc300;
+            color: #4a3200;
             font-size: 30px;
             padding: 14px 0;
             border-radius: 14px;
@@ -139,11 +139,12 @@
 
         button.primary:active {
             transform: scale(0.97);
-            background: #ff4f6e;
+            background: #e6ac00;
         }
 
         button.primary:disabled {
-            background: #ffc2cc;
+            background: #ffe9a8;
+            color: #c9a227;
             cursor: not-allowed;
         }
 
