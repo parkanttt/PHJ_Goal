@@ -1,64 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bucket List ver.2023 </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <title>PHJ Goal</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dongle&display=swap');
-        *{
+
+        * {
+            box-sizing: border-box;
             font-family: 'Dongle', sans-serif;
         }
-        .bg {
-            width: 360px;
-            background-image: url("https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/bg-grid.png");
-            background-size: cover;
-            background-position: center;
-            
-            margin: auto;
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(160deg, #ff9a8b, #ff6a88, #ff99ac);
+            display: flex;
+            justify-content: center;
+            padding: calc(24px + env(safe-area-inset-top)) 0 60px;
         }
 
-        .bucket {
-            width: 160px;
-            height: 160px;
-            background-size: cover;
-            background-position: center;
+        .app {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 20px;
         }
 
-        .img1 {
-            background-image: url("https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/bucket-red.png");
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 48px;
+            margin: 10px 0 0;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
-        .img2 {
-            background-image: url("https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/bucket-lightred.png");
+        .subtitle {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin: 0 0 24px;
+            opacity: 0.9;
         }
 
-        .title {
-            background-color: tomato;
-            border-radius: 10px;
-            padding: 4px 14px;
-            color: white;
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
-        .msg {
-            margin: -5px 0 15px;
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #fff;
+            border-radius: 18px;
+            padding: 18px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .menu-item:active {
+            transform: scale(0.97);
+        }
+
+        .menu-icon {
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+
+        .menu-text {
+            flex: 1;
+        }
+
+        .menu-title {
+            font-size: 30px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        .menu-desc {
+            font-size: 22px;
+            color: #999;
+            margin: 2px 0 0;
+        }
+
+        .menu-arrow {
+            font-size: 26px;
+            color: #ffb3c1;
+            flex-shrink: 0;
         }
     </style>
-    <link rel="stylesheet" type="text/css"href="https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/sparta-bucket2.css">
 </head>
 
-<body class="bg center">
-    <h1 class="title">Bucket List ver.2023</h1>
-    <p class="msg">적게일하고 돈 많이 벌자</p>
-    <div class="flex-row wrap">
-        <div class="bucket img1 center">간지나게 숨쉬기</div>
-        <div class="bucket img2 center">간지나게 숨쉬기</div>
-        <div class="bucket img2 center ">간지나게 숨쉬기</div>
-        <div class="bucket img1 center done">간지나게 숨쉬기</div>
-        <div class="bucket img1 center">간지나게 숨쉬기</div>
-        <div class="bucket img2 center">간지나게 숨쉬기</div>
+<body>
+    <div class="app">
+        <h1>PHJ Goal</h1>
+        <p class="subtitle">하고 싶은 기능을 선택하세요</p>
+
+        <div class="menu-list">
+            <a class="menu-item" href="product-recommend.html">
+                <span class="menu-icon">🎯</span>
+                <span class="menu-text">
+                    <p class="menu-title">박스 뽑기</p>
+                    <p class="menu-desc">사진 속 상자를 표시하고 랜덤으로 하나를 뽑아요</p>
+                </span>
+                <span class="menu-arrow">›</span>
+            </a>
+        </div>
     </div>
 </body>
 
