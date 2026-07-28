@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <title>사진 보고 뭐 살지 추천</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dongle&display=swap');
@@ -20,7 +20,7 @@
             background: linear-gradient(160deg, #ff9a8b, #ff6a88, #ff99ac);
             display: flex;
             justify-content: center;
-            padding: 24px 0 60px;
+            padding: calc(24px + env(safe-area-inset-top)) 0 60px;
         }
 
         .app {
@@ -54,12 +54,15 @@
         }
 
         .upload-box {
+            display: block;
+            width: 100%;
             border: 3px dashed #ff6a88;
             border-radius: 16px;
             padding: 24px 12px;
             text-align: center;
             cursor: pointer;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .upload-box:active {
@@ -233,7 +236,7 @@
             <label class="upload-box" id="uploadBox">
                 <span class="icon">📷</span>
                 <p id="uploadText">사진 올리기 / 촬영하기</p>
-                <input type="file" id="fileInput" accept="image/*" capture="environment">
+                <input type="file" id="fileInput" accept="image/*">
             </label>
             <img id="preview" alt="업로드한 사진 미리보기">
             <button class="primary" id="recommendBtn" disabled>이 사진으로 추천받기</button>
