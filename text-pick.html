@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <title>텍스트 뽑기</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dongle&display=swap');
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Dongle', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(160deg, #ff9a8b, #ff6a88, #ff99ac);
+            display: flex;
+            justify-content: center;
+            padding: calc(24px + env(safe-area-inset-top)) 0 60px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #fff;
+            opacity: 0.9;
+            font-size: 22px;
+            text-decoration: none;
+            margin-top: 4px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 44px;
+            margin: 6px 0 0;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin: 0 0 20px;
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 18px;
+        }
+
+        .entries {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .entry-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .entry-input {
+            flex: 1;
+            width: 100%;
+            font-family: 'Dongle', sans-serif;
+            font-size: 26px;
+            padding: 10px 14px;
+            border: 2px solid #ffd6dd;
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .entry-input:focus {
+            border-color: #ff6a88;
+        }
+
+        .entry-row.winner .entry-input {
+            border-color: #a5680a;
+            background: #fff3d0;
+        }
+
+        .remove-btn {
+            flex-shrink: 0;
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 50%;
+            background: #f2f2f2;
+            color: #999;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        button.ghost {
+            border: none;
+            background: #eee;
+            color: #555;
+            font-size: 22px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        button.primary {
+            width: 100%;
+            border: none;
+            background: #ff6a88;
+            color: #fff;
+            font-size: 30px;
+            padding: 14px 0;
+            border-radius: 14px;
+            margin-top: 14px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        button.primary:active {
+            transform: scale(0.97);
+            background: #ff4f6e;
+        }
+
+        button.primary:disabled {
+            background: #ffc2cc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #resultCard {
+            animation: popIn 0.35s ease;
+            text-align: center;
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-text {
+            font-size: 40px;
+            font-weight: bold;
+            color: #333;
+            margin: 0 0 12px;
+            word-break: break-word;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #fff;
+            opacity: 0.85;
+            font-size: 20px;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <a class="back-link" href="index.html">← 메인으로</a>
+        <h1>텍스트 뽑기 📝</h1>
+        <p class="subtitle">항목을 여러 개 입력하고<br>그중 하나를 랜덤으로 뽑아드려요</p>
+
+        <div class="card">
+            <div class="entries" id="entries">
+                <div class="entry-row">
+                    <input type="text" class="entry-input" placeholder="항목 1">
+                    <button class="remove-btn">×</button>
+                </div>
+                <div class="entry-row">
+                    <input type="text" class="entry-input" placeholder="항목 2">
+                    <button class="remove-btn">×</button>
+                </div>
+            </div>
+            <button class="ghost add-btn" id="addBtn">+ 항목 추가</button>
+            <button class="primary" id="drawBtn" disabled>뽑기 🎲</button>
+        </div>
+
+        <div class="card hidden" id="resultCard">
+            <p class="result-text" id="resultText"></p>
+            <button class="ghost" id="redrawBtn">다시 뽑기 🔀</button>
+        </div>
+
+        <p class="footer-note">* 빈 항목은 제외하고, 입력된 항목 중에서만 랜덤으로 뽑아요.</p>
+    </div>
+
+    <script>
+        const entries = document.getElementById('entries');
+        const addBtn = document.getElementById('addBtn');
+        const drawBtn = document.getElementById('drawBtn');
+        const resultCard = document.getElementById('resultCard');
+        const resultText = document.getElementById('resultText');
+        const redrawBtn = document.getElementById('redrawBtn');
+
+        let rolling = false;
+
+        function makeRow(placeholderIndex) {
+            const row = document.createElement('div');
+            row.className = 'entry-row';
+            row.innerHTML =
+                '<input type="text" class="entry-input" placeholder="항목 ' + placeholderIndex + '">' +
+                '<button class="remove-btn">×</button>';
+            return row;
+        }
+
+        function updateDrawState() {
+            const values = getValues();
+            drawBtn.disabled = values.length === 0;
+        }
+
+        function getValues() {
+            return Array.from(entries.querySelectorAll('.entry-input'))
+                .map(i => i.value.trim())
+                .filter(v => v.length > 0);
+        }
+
+        function clearWinnerStyles() {
+            entries.querySelectorAll('.entry-row').forEach(r => r.classList.remove('winner'));
+        }
+
+        addBtn.addEventListener('click', () => {
+            const row = makeRow(entries.children.length + 1);
+            entries.appendChild(row);
+            row.querySelector('.entry-input').focus();
+            updateDrawState();
+        });
+
+        entries.addEventListener('input', () => {
+            resultCard.classList.add('hidden');
+            clearWinnerStyles();
+            updateDrawState();
+        });
+
+        entries.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('remove-btn')) return;
+            e.target.closest('.entry-row').remove();
+            resultCard.classList.add('hidden');
+            updateDrawState();
+        });
+
+        function draw() {
+            const values = getValues();
+            if (values.length === 0 || rolling) return;
+            rolling = true;
+            resultCard.classList.add('hidden');
+
+            const rows = Array.from(entries.querySelectorAll('.entry-row'))
+                .filter(r => r.querySelector('.entry-input').value.trim().length > 0);
+
+            let ticks = 0;
+            const maxTicks = 14 + Math.floor(Math.random() * 6);
+            const interval = setInterval(() => {
+                clearWinnerStyles();
+                const idx = Math.floor(Math.random() * rows.length);
+                rows[idx].classList.add('winner');
+                ticks++;
+                if (ticks >= maxTicks) {
+                    clearInterval(interval);
+                    const winnerValue = values[Math.floor(Math.random() * values.length)];
+                    clearWinnerStyles();
+                    const winnerRow = rows.find(r => r.querySelector('.entry-input').value.trim() === winnerValue);
+                    if (winnerRow) winnerRow.classList.add('winner');
+                    resultText.textContent = '🎉 "' + winnerValue + '" 를 뽑았어요!';
+                    resultCard.classList.remove('hidden');
+                    rolling = false;
+                }
+            }, 90);
+        }
+
+        drawBtn.addEventListener('click', draw);
+        redrawBtn.addEventListener('click', draw);
+
+        updateDrawState();
+    </script>
+</body>
+
+</html>
