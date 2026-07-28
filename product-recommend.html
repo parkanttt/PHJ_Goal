@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>사진 보고 뭐 살지 추천</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dongle&display=swap');
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Dongle', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(160deg, #ff9a8b, #ff6a88, #ff99ac);
+            display: flex;
+            justify-content: center;
+            padding: 24px 0 60px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 44px;
+            margin: 10px 0 0;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin: 0 0 20px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 18px;
+        }
+
+        .upload-box {
+            border: 3px dashed #ff6a88;
+            border-radius: 16px;
+            padding: 24px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .upload-box:active {
+            background: #fff0f2;
+        }
+
+        .upload-box .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .upload-box p {
+            font-size: 26px;
+            color: #ff6a88;
+            margin: 4px 0 0;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #preview {
+            width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 14px;
+            display: none;
+            margin-top: 14px;
+        }
+
+        button.primary {
+            width: 100%;
+            border: none;
+            background: #ff6a88;
+            color: #fff;
+            font-size: 30px;
+            padding: 14px 0;
+            border-radius: 14px;
+            margin-top: 14px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        button.primary:active {
+            transform: scale(0.97);
+            background: #ff4f6e;
+        }
+
+        button.primary:disabled {
+            background: #ffc2cc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .spinner {
+            width: 46px;
+            height: 46px;
+            margin: 0 auto 14px;
+            border: 6px solid #ffd6dd;
+            border-top-color: #ff6a88;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading p {
+            font-size: 26px;
+            color: #ff6a88;
+            margin: 0;
+        }
+
+        .mood-tag {
+            display: inline-block;
+            background: #fff0f2;
+            color: #ff6a88;
+            font-size: 22px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            margin-bottom: 10px;
+        }
+
+        .result-emoji {
+            font-size: 70px;
+            text-align: center;
+            margin: 4px 0;
+        }
+
+        .result-name {
+            text-align: center;
+            font-size: 38px;
+            font-weight: bold;
+            color: #333;
+            margin: 0 0 4px;
+        }
+
+        .result-category {
+            text-align: center;
+            font-size: 22px;
+            color: #999;
+            margin: 0 0 12px;
+        }
+
+        .result-reason {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 26px;
+            color: #555;
+            line-height: 1.35;
+            text-align: center;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-row a,
+        .btn-row button {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            font-size: 24px;
+            padding: 12px 0;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-search {
+            background: #333;
+            color: #fff;
+        }
+
+        .btn-retry {
+            background: #eee;
+            color: #555;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #fff;
+            opacity: 0.85;
+            font-size: 20px;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <h1>오늘 뭐 살까?</h1>
+        <p class="subtitle">사진 한 장이면 충분해요</p>
+
+        <div class="card">
+            <label class="upload-box" id="uploadBox">
+                <span class="icon">📷</span>
+                <p id="uploadText">사진 올리기 / 촬영하기</p>
+                <input type="file" id="fileInput" accept="image/*" capture="environment">
+            </label>
+            <img id="preview" alt="업로드한 사진 미리보기">
+            <button class="primary" id="recommendBtn" disabled>이 사진으로 추천받기</button>
+        </div>
+
+        <div class="card hidden" id="loadingCard">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>사진 분위기 분석 중...</p>
+            </div>
+        </div>
+
+        <div class="card hidden" id="resultCard">
+            <div style="text-align:center;">
+                <span class="mood-tag" id="moodTag"></span>
+            </div>
+            <div class="result-emoji" id="resultEmoji"></div>
+            <p class="result-name" id="resultName"></p>
+            <p class="result-category" id="resultCategory"></p>
+            <div class="result-reason" id="resultReason"></div>
+            <div class="btn-row">
+                <button class="btn-retry" id="retryBtn">다시 뽑기 🔀</button>
+                <a class="btn-search" id="searchLink" href="#" target="_blank" rel="noopener">검색해보기 🔍</a>
+            </div>
+        </div>
+
+        <p class="footer-note">* 사진의 전체 색감을 분석해 어울리는 아이템을 랜덤으로 골라드려요</p>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadBox = document.getElementById('uploadBox');
+        const uploadText = document.getElementById('uploadText');
+        const preview = document.getElementById('preview');
+        const recommendBtn = document.getElementById('recommendBtn');
+        const loadingCard = document.getElementById('loadingCard');
+        const resultCard = document.getElementById('resultCard');
+        const moodTag = document.getElementById('moodTag');
+        const resultEmoji = document.getElementById('resultEmoji');
+        const resultName = document.getElementById('resultName');
+        const resultCategory = document.getElementById('resultCategory');
+        const resultReason = document.getElementById('resultReason');
+        const searchLink = document.getElementById('searchLink');
+        const retryBtn = document.getElementById('retryBtn');
+
+        let currentMood = null;
+
+        // 사진 분위기(밝기/색감 톤)별 추천 아이템 목록
+        const PRODUCTS = {
+            warm: [
+                { emoji: '🧣', name: '니트 머플러', category: '패션', reason: '사진에서 따뜻한 색감이 느껴져요. 포근한 니트 아이템으로 그 느낌을 이어가 보세요.' },
+                { emoji: '🕯️', name: '우드 향초', category: '홈/리빙', reason: '따뜻한 톤의 사진과 잘 어울리는 은은한 향초 하나, 방 분위기를 채워줄 거예요.' },
+                { emoji: '☕', name: '드립 커피 세트', category: '푸드', reason: '아늑한 색감의 사진이네요. 향긋한 커피 한 잔의 여유를 더해보세요.' },
+                { emoji: '🧦', name: '수면양말', category: '패션', reason: '따뜻함이 느껴지는 사진, 발끝까지 포근하게 챙겨보는 건 어때요?' },
+                { emoji: '🍯', name: '수제 꿀차 세트', category: '푸드', reason: '달콤하고 따뜻한 무드! 몸도 마음도 데워줄 아이템이에요.' }
+            ],
+            cool: [
+                { emoji: '🧴', name: '수분 진정 토너', category: '뷰티', reason: '시원한 톤의 사진이에요. 피부에도 청량한 진정 케어를 선물해보세요.' },
+                { emoji: '💧', name: '텀블러', category: '리빙', reason: '차분하고 쿨한 색감! 매일 들고 다닐 예쁜 텀블러 어때요.' },
+                { emoji: '🕶️', name: '선글라스', category: '패션', reason: '시크한 분위기의 사진이네요. 포인트가 될 선글라스를 추천해요.' },
+                { emoji: '🧊', name: '미니 선풍기', category: '전자기기', reason: '쿨한 무드가 느껴져요. 어디서든 시원하게 다닐 수 있는 아이템이에요.' },
+                { emoji: '🩵', name: '블루라이트 차단 안경', category: '전자기기', reason: '차분한 색감의 사진, 눈 건강도 함께 챙겨보세요.' }
+            ],
+            bright: [
+                { emoji: '💄', name: '틴트 립밤', category: '뷰티', reason: '화사한 사진이에요! 화사함을 더해줄 컬러 아이템 어때요.' },
+                { emoji: '🎧', name: '무선 이어폰', category: '전자기기', reason: '밝고 경쾌한 분위기, 신나는 플레이리스트와 함께해보세요.' },
+                { emoji: '👟', name: '캔버스 스니커즈', category: '패션', reason: '사진 톤이 밝고 산뜻해요. 가벼운 발걸음을 만들어줄 신발 하나 어때요.' },
+                { emoji: '🌻', name: '미니 화분', category: '홈/리빙', reason: '생기 넘치는 사진이네요! 책상 위에 작은 생기를 더해보세요.' },
+                { emoji: '📸', name: '즉석카메라 필름', category: '취미', reason: '이 밝은 순간, 사진으로 한 번 더 남겨보는 건 어때요?' }
+            ],
+            dark: [
+                { emoji: '🕯️', name: '무드등', category: '홈/리빙', reason: '차분하고 어두운 톤이에요. 은은한 무드등으로 분위기를 더해보세요.' },
+                { emoji: '📖', name: '베스트셀러 소설', category: '취미', reason: '조용한 분위기의 사진, 책 한 권과 함께하는 시간은 어떨까요.' },
+                { emoji: '🛌', name: '극세사 담요', category: '홈/리빙', reason: '깊고 차분한 색감이네요. 포근한 담요로 편안함을 더해보세요.' },
+                { emoji: '🎵', name: '헤드폰', category: '전자기기', reason: '몰입감 있는 분위기예요. 좋은 사운드로 여운을 즐겨보세요.' },
+                { emoji: '🍫', name: '다크초콜릿', category: '푸드', reason: '깊은 톤의 사진과 잘 어울리는 진한 다크초콜릿 어때요.' }
+            ],
+            green: [
+                { emoji: '🪴', name: '수경식물', category: '홈/리빙', reason: '싱그러운 초록빛이 느껴져요. 작은 식물로 공간에 생기를 더해보세요.' },
+                { emoji: '🥗', name: '샐러드 밀키트', category: '푸드', reason: '자연스러운 색감이네요. 오늘은 건강한 한 끼 어때요.' },
+                { emoji: '🎒', name: '캠핑용 백팩', category: '취미', reason: '초록빛 사진을 보니 야외 활동이 생각나요. 가벼운 아웃도어템 추천해요.' },
+                { emoji: '🧘', name: '요가 매트', category: '헬스', reason: '편안한 자연 톤이에요. 몸과 마음을 이완시켜줄 요가 타임 어때요.' }
+            ],
+            neutral: [
+                { emoji: '🎲', name: '오늘의 랜덤 아이템', category: '깜짝 추천', reason: '사진 색감이 다채로워서 딱 하나로 정하기 어려워요. 그래서 완전 랜덤으로 골라봤어요!' },
+                { emoji: '🧴', name: '핸드크림', category: '뷰티', reason: '언제나 무난하게 좋은 선택! 오늘은 나를 위한 작은 선물 어때요.' },
+                { emoji: '🔌', name: '보조배터리', category: '전자기기', reason: '실용템 하나 챙겨볼까요? 언제나 든든한 필수템이에요.' },
+                { emoji: '🐾', name: '반려동물 간식', category: '반려동물', reason: '오늘따라 왠지 함께하는 존재가 떠오르네요. 작은 간식 하나 어때요.' },
+                { emoji: '📔', name: '다이어리', category: '취미', reason: '오늘의 이 순간, 기록으로 남겨보는 것도 좋겠어요.' }
+            ]
+        };
+
+        const MOOD_LABEL = {
+            warm: '🔥 따뜻한 톤',
+            cool: '❄️ 시원한 톤',
+            bright: '✨ 화사한 톤',
+            dark: '🌙 차분한 톤',
+            green: '🌿 싱그러운 톤',
+            neutral: '🎨 다채로운 톤'
+        };
+
+        uploadBox.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                uploadText.textContent = '다른 사진으로 바꾸기';
+                recommendBtn.disabled = false;
+                resultCard.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function analyzeMood(img) {
+            const canvas = document.createElement('canvas');
+            const size = 40;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, size, size);
+            let r = 0, g = 0, b = 0, count = 0;
+            try {
+                const data = ctx.getImageData(0, 0, size, size).data;
+                for (let i = 0; i < data.length; i += 4) {
+                    r += data[i];
+                    g += data[i + 1];
+                    b += data[i + 2];
+                    count++;
+                }
+            } catch (err) {
+                return 'neutral';
+            }
+            r = r / count; g = g / count; b = b / count;
+            const brightness = (r + g + b) / 3;
+
+            if (brightness > 190) return 'bright';
+            if (brightness < 75) return 'dark';
+            if (g > r && g > b && g - Math.min(r, b) > 12) return 'green';
+            if (r - b > 18) return 'warm';
+            if (b - r > 18) return 'cool';
+            return 'neutral';
+        }
+
+        function showResult(mood) {
+            currentMood = mood;
+            const list = PRODUCTS[mood];
+            const item = list[Math.floor(Math.random() * list.length)];
+
+            moodTag.textContent = MOOD_LABEL[mood];
+            resultEmoji.textContent = item.emoji;
+            resultName.textContent = item.name;
+            resultCategory.textContent = item.category;
+            resultReason.textContent = item.reason;
+            searchLink.href = 'https://www.coupang.com/np/search?q=' + encodeURIComponent(item.name);
+
+            loadingCard.classList.add('hidden');
+            resultCard.classList.remove('hidden');
+        }
+
+        recommendBtn.addEventListener('click', () => {
+            resultCard.classList.add('hidden');
+            loadingCard.classList.remove('hidden');
+            setTimeout(() => {
+                const mood = analyzeMood(preview);
+                showResult(mood);
+            }, 900);
+        });
+
+        retryBtn.addEventListener('click', () => {
+            if (currentMood) showResult(currentMood);
+        });
+    </script>
+</body>
+
+</html>
