@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-    <title>굿즈 랜덤박스</title>
+    <title>박스 뽑기</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dongle&display=swap');
 
@@ -43,6 +43,7 @@
             font-size: 24px;
             margin: 0 0 20px;
             opacity: 0.9;
+            line-height: 1.3;
         }
 
         .card {
@@ -85,13 +86,97 @@
             display: none;
         }
 
-        #preview {
+        .marker-area {
+            position: relative;
             width: 100%;
-            max-height: 280px;
-            object-fit: cover;
-            border-radius: 14px;
-            display: none;
             margin-top: 14px;
+            display: none;
+            touch-action: manipulation;
+        }
+
+        #preview {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 14px;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        #markersLayer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid #ff6a88;
+            color: #ff6a88;
+            font-weight: bold;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+        }
+
+        .marker.winner {
+            background: #ffd166;
+            border-color: #a5680a;
+            color: #7a4e00;
+            transform: translate(-50%, -50%) scale(1.3);
+            z-index: 5;
+            animation: winnerPulse 0.9s ease-in-out infinite;
+        }
+
+        @keyframes winnerPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 209, 102, 0);
+            }
+        }
+
+        .hint {
+            font-size: 20px;
+            color: #999;
+            text-align: center;
+            margin: 10px 0 0;
+        }
+
+        .marker-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .marker-count {
+            font-size: 24px;
+            color: #555;
+        }
+
+        button.ghost {
+            border: none;
+            background: #eee;
+            color: #555;
+            font-size: 22px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
         }
 
         button.primary {
@@ -121,38 +206,9 @@
             display: none !important;
         }
 
-        .loading {
-            text-align: center;
-            padding: 24px 0;
-        }
-
-        .box-shake {
-            font-size: 60px;
-            display: inline-block;
-            margin-bottom: 10px;
-            animation: shake 0.45s infinite;
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: rotate(-10deg) scale(1);
-            }
-
-            50% {
-                transform: rotate(10deg) scale(1.05);
-            }
-        }
-
-        .loading p {
-            font-size: 26px;
-            color: #ff6a88;
-            margin: 0;
-        }
-
         #resultCard {
             animation: popIn 0.35s ease;
+            text-align: center;
         }
 
         @keyframes popIn {
@@ -167,105 +223,11 @@
             }
         }
 
-        .rarity-badge {
-            display: inline-block;
-            font-size: 24px;
-            font-weight: bold;
-            padding: 5px 18px;
-            border-radius: 999px;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .rarity-common {
-            background: #f0f0f0;
-            color: #888;
-        }
-
-        .rarity-rare {
-            background: #e7f1fd;
-            color: #3b82c4;
-        }
-
-        .rarity-epic {
-            background: #f3e8fb;
-            color: #9b59b6;
-        }
-
-        .rarity-legendary {
-            background: linear-gradient(90deg, #ffe9a8, #ffd166);
-            color: #a5680a;
-            box-shadow: 0 0 12px rgba(255, 209, 102, 0.7);
-            animation: glow 1.2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 6px rgba(255, 209, 102, 0.5);
-            }
-
-            to {
-                box-shadow: 0 0 16px rgba(255, 209, 102, 0.9);
-            }
-        }
-
-        .result-emoji {
-            font-size: 70px;
-            text-align: center;
-            margin: 4px 0;
-        }
-
-        .result-name {
-            text-align: center;
-            font-size: 38px;
+        .result-text {
+            font-size: 40px;
             font-weight: bold;
             color: #333;
-            margin: 0 0 4px;
-        }
-
-        .result-mood {
-            text-align: center;
-            font-size: 22px;
-            color: #999;
             margin: 0 0 12px;
-        }
-
-        .result-reason {
-            background: #fafafa;
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 26px;
-            color: #555;
-            line-height: 1.35;
-            text-align: center;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        .btn-row a,
-        .btn-row button {
-            flex: 1;
-            text-align: center;
-            text-decoration: none;
-            font-size: 24px;
-            padding: 12px 0;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-search {
-            background: #333;
-            color: #fff;
-        }
-
-        .btn-retry {
-            background: #eee;
-            color: #555;
         }
 
         .footer-note {
@@ -274,14 +236,15 @@
             opacity: 0.85;
             font-size: 20px;
             margin-top: 6px;
+            line-height: 1.4;
         }
     </style>
 </head>
 
 <body>
     <div class="app">
-        <h1>굿즈 랜덤박스 🎁</h1>
-        <p class="subtitle">사진 한 장으로 오늘의 굿즈를 뽑아보세요</p>
+        <h1>박스 뽑기 🎯</h1>
+        <p class="subtitle">사진 속 상자를 탭해서 표시하면<br>번호를 매기고 그중 하나를 뽑아드려요</p>
 
         <div class="card">
             <label class="upload-box" id="uploadBox">
@@ -289,120 +252,46 @@
                 <p id="uploadText">사진 올리기 / 사진첩에서 선택</p>
                 <input type="file" id="fileInput" accept="image/*">
             </label>
-            <img id="preview" alt="업로드한 사진 미리보기">
-            <button class="primary" id="recommendBtn" disabled>랜덤박스 뽑기 🎲</button>
-        </div>
 
-        <div class="card hidden" id="loadingCard">
-            <div class="loading">
-                <div class="box-shake">🎁</div>
-                <p>박스를 흔드는 중...</p>
+            <div class="marker-area" id="markerArea">
+                <img id="preview" alt="업로드한 사진">
+                <div id="markersLayer"></div>
             </div>
+            <p class="hint" id="hintText">사진을 눌러 상자 위치를 표시하세요 (표시를 다시 누르면 삭제돼요)</p>
+
+            <div class="marker-controls">
+                <span class="marker-count" id="markerCount">0개 표시됨</span>
+                <button class="ghost" id="resetBtn">초기화</button>
+            </div>
+
+            <button class="primary" id="drawBtn" disabled>뽑기 🎲</button>
         </div>
 
         <div class="card hidden" id="resultCard">
-            <div style="text-align:center;">
-                <span class="rarity-badge" id="rarityBadge"></span>
-            </div>
-            <div class="result-emoji" id="resultEmoji"></div>
-            <p class="result-name" id="resultName"></p>
-            <p class="result-mood" id="resultMood"></p>
-            <div class="result-reason" id="resultReason"></div>
-            <div class="btn-row">
-                <button class="btn-retry" id="retryBtn">다시 뽑기 🔀</button>
-                <a class="btn-search" id="searchLink" href="#" target="_blank" rel="noopener">검색해보기 🔍</a>
-            </div>
+            <p class="result-text" id="resultText"></p>
+            <button class="ghost" id="redrawBtn">다시 뽑기 🔀</button>
         </div>
 
-        <p class="footer-note">* 사진의 색감을 분석해서, 그 무드에 어울리는 굿즈를 랜덤박스처럼 뽑아드려요. 등급은 완전 랜덤!</p>
+        <p class="footer-note">* 표시한 순서와 상관없이, 왼쪽 → 오른쪽으로 번호를 매긴 뒤 다음 줄(위→아래)로 자동 정렬돼요.</p>
     </div>
 
     <script>
         const fileInput = document.getElementById('fileInput');
-        const uploadBox = document.getElementById('uploadBox');
         const uploadText = document.getElementById('uploadText');
         const preview = document.getElementById('preview');
-        const recommendBtn = document.getElementById('recommendBtn');
-        const loadingCard = document.getElementById('loadingCard');
+        const markerArea = document.getElementById('markerArea');
+        const markersLayer = document.getElementById('markersLayer');
+        const hintText = document.getElementById('hintText');
+        const markerCount = document.getElementById('markerCount');
+        const resetBtn = document.getElementById('resetBtn');
+        const drawBtn = document.getElementById('drawBtn');
         const resultCard = document.getElementById('resultCard');
-        const rarityBadge = document.getElementById('rarityBadge');
-        const resultEmoji = document.getElementById('resultEmoji');
-        const resultName = document.getElementById('resultName');
-        const resultMood = document.getElementById('resultMood');
-        const resultReason = document.getElementById('resultReason');
-        const searchLink = document.getElementById('searchLink');
-        const retryBtn = document.getElementById('retryBtn');
+        const resultText = document.getElementById('resultText');
+        const redrawBtn = document.getElementById('redrawBtn');
 
-        let currentMood = null;
-
-        // 사진 분위기(밝기/색감 톤)별 굿즈 랜덤박스 아이템 (rarity: common/rare/epic/legendary)
-        const PRODUCTS = {
-            warm: [
-                { emoji: '🧸', name: '플러시 마스코트 키링', rarity: 'common', reason: '따뜻한 색감의 사진이에요. 폭신폭신한 마스코트 키링이 나왔어요.' },
-                { emoji: '🔑', name: '우드톤 아크릴 키링', rarity: 'common', reason: '은은한 우드톤 아크릴 키링, 데일리로 달고 다니기 좋아요.' },
-                { emoji: '🎗️', name: '자수 뱃지 세트', rarity: 'rare', reason: '포근한 무드에 어울리는 자수 뱃지 세트를 뽑았어요.' },
-                { emoji: '🧣', name: '캐릭터 니트 파우치', rarity: 'epic', reason: '따뜻한 톤 사진에서만 나오는 니트 파우치, 에픽 등급이에요!' },
-                { emoji: '🕯️', name: '한정판 미니 무드등', rarity: 'legendary', reason: '와, 레전더리! 따뜻한 사진에서만 뜨는 한정판 무드등이 나왔어요.' }
-            ],
-            cool: [
-                { emoji: '💠', name: '클리어 포토카드 홀더', rarity: 'common', reason: '시원한 톤의 사진이에요. 투명한 포토카드 홀더가 나왔어요.' },
-                { emoji: '💧', name: '미니 물방울 마그넷', rarity: 'common', reason: '쿨한 색감과 잘 어울리는 물방울 마그넷이에요.' },
-                { emoji: '🕶️', name: '캐릭터 선글라스 스트랩', rarity: 'rare', reason: '시크한 분위기의 사진, 선글라스 스트랩을 뽑았어요.' },
-                { emoji: '🩵', name: '홀로그램 아크릴 스탠드', rarity: 'epic', reason: '반짝이는 홀로그램 아크릴 스탠드, 쿨톤 전용 에픽템이에요!' },
-                { emoji: '🧿', name: '시크릿 나이트 피규어', rarity: 'legendary', reason: '레전더리 등급! 시원한 톤에서만 나오는 시크릿 피규어예요.' }
-            ],
-            bright: [
-                { emoji: '🌈', name: '무지개 스티커팩', rarity: 'common', reason: '화사한 사진이에요! 알록달록 스티커팩이 나왔어요.' },
-                { emoji: '💛', name: '컬러풀 뱃지 세트', rarity: 'common', reason: '밝고 경쾌한 분위기에 어울리는 뱃지 세트예요.' },
-                { emoji: '🎀', name: '리본 헤어핀', rarity: 'rare', reason: '산뜻한 사진 톤에서 리본 헤어핀을 뽑았어요.' },
-                { emoji: '👟', name: '미니 스니커즈 키링', rarity: 'epic', reason: '화사한 톤 전용 에픽템, 미니 스니커즈 키링이에요!' },
-                { emoji: '🌟', name: '반짝이 시크릿 피규어', rarity: 'legendary', reason: '대박! 화사한 사진에서만 뜨는 레전더리 시크릿 피규어예요.' }
-            ],
-            dark: [
-                { emoji: '🖤', name: '블랙 라인 스티커', rarity: 'common', reason: '차분한 톤의 사진이에요. 심플한 블랙 라인 스티커가 나왔어요.' },
-                { emoji: '🌙', name: '미니 문 마그넷', rarity: 'common', reason: '조용한 분위기와 잘 어울리는 초승달 마그넷이에요.' },
-                { emoji: '🦇', name: '캐릭터 실루엣 뱃지', rarity: 'rare', reason: '깊은 톤의 사진에서 실루엣 뱃지를 뽑았어요.' },
-                { emoji: '🎩', name: '시크 아크릴 스탠드', rarity: 'epic', reason: '다크 톤 전용 에픽템, 시크한 아크릴 스탠드예요!' },
-                { emoji: '🕶️', name: '한정판 블랙에디션 피규어', rarity: 'legendary', reason: '레전더리! 어두운 톤에서만 나오는 블랙에디션 피규어예요.' }
-            ],
-            green: [
-                { emoji: '🍀', name: '클로버 키링', rarity: 'common', reason: '싱그러운 초록빛 사진이에요. 행운의 클로버 키링이 나왔어요.' },
-                { emoji: '🌵', name: '미니 화분 마그넷', rarity: 'common', reason: '자연스러운 색감과 잘 어울리는 화분 마그넷이에요.' },
-                { emoji: '🐢', name: '캐릭터 미니 인형', rarity: 'rare', reason: '초록빛 사진에서 귀여운 미니 인형을 뽑았어요.' },
-                { emoji: '🦋', name: '나비 아크릴 스탠드', rarity: 'epic', reason: '그린 톤 전용 에픽템, 나비 아크릴 스탠드예요!' },
-                { emoji: '🌳', name: '시크릿 자연 테마 피규어', rarity: 'legendary', reason: '레전더리 등극! 초록빛 사진에서만 나오는 시크릿 피규어예요.' }
-            ],
-            neutral: [
-                { emoji: '📎', name: '캐릭터 클립 세트', rarity: 'common', reason: '색감이 다채로운 사진이라 무난하게 잘 어울리는 클립 세트가 나왔어요.' },
-                { emoji: '🎲', name: '오늘의 미스터리 굿즈', rarity: 'common', reason: '딱 하나로 정하기 어려운 사진! 완전 랜덤 미스터리 굿즈예요.' },
-                { emoji: '🧷', name: '뱃지 3종 세트', rarity: 'rare', reason: '다채로운 톤에 어울리는 뱃지 3종 세트를 뽑았어요.' },
-                { emoji: '🎁', name: '서프라이즈 굿즈 세트', rarity: 'epic', reason: '에픽 등급! 알록달록 서프라이즈 굿즈 세트가 나왔어요.' },
-                { emoji: '👑', name: '히든 레전더리 굿즈', rarity: 'legendary', reason: '축하해요! 이번 뽑기에서 히든 레전더리 굿즈가 나왔어요.' }
-            ]
-        };
-
-        const MOOD_LABEL = {
-            warm: '🔥 따뜻한 톤',
-            cool: '❄️ 시원한 톤',
-            bright: '✨ 화사한 톤',
-            dark: '🌙 차분한 톤',
-            green: '🌿 싱그러운 톤',
-            neutral: '🎨 다채로운 톤'
-        };
-
-        const RARITY_LABEL = {
-            common: '일반',
-            rare: '레어',
-            epic: '에픽',
-            legendary: '레전더리'
-        };
-
-        const RARITY_WEIGHT = {
-            common: 50,
-            rare: 30,
-            epic: 15,
-            legendary: 5
-        };
+        let markers = [];
+        let nextId = 1;
+        let rolling = false;
 
         fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
@@ -410,83 +299,125 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 preview.src = e.target.result;
-                preview.style.display = 'block';
+                markerArea.style.display = 'block';
                 uploadText.textContent = '다른 사진으로 바꾸기';
-                recommendBtn.disabled = false;
+                markers = [];
+                nextId = 1;
+                renderMarkers();
+                updateControls();
                 resultCard.classList.add('hidden');
             };
             reader.readAsDataURL(file);
         });
 
-        function analyzeMood(img) {
-            const canvas = document.createElement('canvas');
-            const size = 40;
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, size, size);
-            let r = 0, g = 0, b = 0, count = 0;
-            try {
-                const data = ctx.getImageData(0, 0, size, size).data;
-                for (let i = 0; i < data.length; i += 4) {
-                    r += data[i];
-                    g += data[i + 1];
-                    b += data[i + 2];
-                    count++;
-                }
-            } catch (err) {
-                return 'neutral';
-            }
-            r = r / count; g = g / count; b = b / count;
-            const brightness = (r + g + b) / 3;
-
-            if (brightness > 190) return 'bright';
-            if (brightness < 75) return 'dark';
-            if (g > r && g > b && g - Math.min(r, b) > 12) return 'green';
-            if (r - b > 18) return 'warm';
-            if (b - r > 18) return 'cool';
-            return 'neutral';
-        }
-
-        function pickItem(mood) {
-            const pool = PRODUCTS[mood];
-            const total = pool.reduce((sum, item) => sum + RARITY_WEIGHT[item.rarity], 0);
-            let roll = Math.random() * total;
-            for (const item of pool) {
-                roll -= RARITY_WEIGHT[item.rarity];
-                if (roll < 0) return item;
-            }
-            return pool[pool.length - 1];
-        }
-
-        function showResult(mood) {
-            currentMood = mood;
-            const item = pickItem(mood);
-
-            rarityBadge.textContent = RARITY_LABEL[item.rarity];
-            rarityBadge.className = 'rarity-badge rarity-' + item.rarity;
-            resultEmoji.textContent = item.emoji;
-            resultName.textContent = item.name;
-            resultMood.textContent = MOOD_LABEL[mood] + ' 사진에서 뽑음';
-            resultReason.textContent = item.reason;
-            searchLink.href = 'https://www.coupang.com/np/search?q=' + encodeURIComponent(item.name);
-
-            loadingCard.classList.add('hidden');
-            resultCard.classList.remove('hidden');
-        }
-
-        recommendBtn.addEventListener('click', () => {
+        markerArea.addEventListener('click', (e) => {
+            if (rolling) return;
+            const rect = markerArea.getBoundingClientRect();
+            const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+            const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+            markers.push({ id: nextId++, xPct, yPct });
+            reorderMarkers();
+            renderMarkers();
+            updateControls();
             resultCard.classList.add('hidden');
-            loadingCard.classList.remove('hidden');
-            setTimeout(() => {
-                const mood = analyzeMood(preview);
-                showResult(mood);
-            }, 900);
         });
 
-        retryBtn.addEventListener('click', () => {
-            if (currentMood) showResult(currentMood);
+        function removeMarker(id) {
+            markers = markers.filter(m => m.id !== id);
+            reorderMarkers();
+            renderMarkers();
+            updateControls();
+            resultCard.classList.add('hidden');
+        }
+
+        // 왼쪽 -> 오른쪽으로 번호를 매기고, 다 채우면 다음 줄(위->아래)로 넘어가도록 정렬
+        function reorderMarkers() {
+            const sorted = [...markers].sort((a, b) => a.yPct - b.yPct);
+            const rowThreshold = 7; // 이미지 높이 대비 %
+            const rows = [];
+            for (const m of sorted) {
+                let row = rows.find(r => Math.abs(r.refY - m.yPct) <= rowThreshold);
+                if (!row) {
+                    row = { refY: m.yPct, items: [] };
+                    rows.push(row);
+                }
+                row.items.push(m);
+                row.refY = row.items.reduce((s, i) => s + i.yPct, 0) / row.items.length;
+            }
+            rows.sort((a, b) => a.refY - b.refY);
+
+            let n = 1;
+            const numbered = [];
+            for (const row of rows) {
+                row.items.sort((a, b) => a.xPct - b.xPct);
+                for (const item of row.items) {
+                    item.number = n++;
+                    numbered.push(item);
+                }
+            }
+            markers = numbered;
+        }
+
+        function renderMarkers() {
+            markersLayer.innerHTML = '';
+            markers.forEach(m => {
+                const el = document.createElement('div');
+                el.className = 'marker';
+                el.style.left = m.xPct + '%';
+                el.style.top = m.yPct + '%';
+                el.textContent = m.number;
+                el.dataset.id = m.id;
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (rolling) return;
+                    removeMarker(m.id);
+                });
+                markersLayer.appendChild(el);
+            });
+        }
+
+        function highlightOnly(id) {
+            markersLayer.querySelectorAll('.marker').forEach(el => el.classList.remove('winner'));
+            const el = markersLayer.querySelector('[data-id="' + id + '"]');
+            if (el) el.classList.add('winner');
+        }
+
+        function updateControls() {
+            markerCount.textContent = markers.length + '개 표시됨';
+            drawBtn.disabled = markers.length === 0;
+        }
+
+        resetBtn.addEventListener('click', () => {
+            if (rolling) return;
+            markers = [];
+            renderMarkers();
+            updateControls();
+            resultCard.classList.add('hidden');
         });
+
+        function draw() {
+            if (markers.length === 0 || rolling) return;
+            rolling = true;
+            resultCard.classList.add('hidden');
+            let ticks = 0;
+            const maxTicks = 14 + Math.floor(Math.random() * 6);
+            const interval = setInterval(() => {
+                const idx = Math.floor(Math.random() * markers.length);
+                highlightOnly(markers[idx].id);
+                ticks++;
+                if (ticks >= maxTicks) {
+                    clearInterval(interval);
+                    const winner = markers[Math.floor(Math.random() * markers.length)];
+                    highlightOnly(winner.id);
+                    resultText.textContent = '🎉 ' + winner.number + '번 상자를 골랐어요!';
+                    resultCard.classList.remove('hidden');
+                    rolling = false;
+                }
+            }, 90);
+        }
+
+        drawBtn.addEventListener('click', draw);
+        redrawBtn.addEventListener('click', draw);
     </script>
 </body>
 
